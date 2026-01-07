@@ -8,7 +8,14 @@ app = Flask(__name__)
 CORS(app)
 
 # ================= LOAD MODELS =================
-lstm_model = tf.keras.models.load_model("../models/lstm/lstm_model.h5")
+import os
+import tensorflow as tf
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODEL_PATH = os.path.join(BASE_DIR, "..", "models", "lstm", "lstm_model.h5")
+
+lstm_model = tf.keras.models.load_model(MODEL_PATH)
+
 scaler = joblib.load("../models/lstm/scaler.pkl")
 
 iso_model = joblib.load("../models/isolation_forest/iso_forest.pkl")
