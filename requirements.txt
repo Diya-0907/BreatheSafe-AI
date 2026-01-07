@@ -4,3 +4,6 @@ tensorflow
 numpy
 joblib
 scikit-learn
+flask
+gunicorn
+flask-cors
