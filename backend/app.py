@@ -14,15 +14,21 @@ import tensorflow as tf
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODEL_PATH = os.path.join(BASE_DIR, "..", "models", "lstm", "lstm_model.h5")
 
-lstm_model = tf.keras.models.load_model(MODEL_PATH)
+lstm_model = None
 
-scaler = joblib.load("../models/lstm/scaler.pkl")
+def get_model():
+    global lstm_model
+    if lstm_model is None:
+        lstm_model = tf.keras.models.load_model(MODEL_PATH)
+    return lstm_model
 
-iso_model = joblib.load("../models/isolation_forest/iso_forest.pkl")
 
+scaler = joblib.load(os.path.join(BASE_DIR, "..", "models", "lstm", "scaler.pkl"))
+iso_model = joblib.load(os.path.join(BASE_DIR, "..", "models", "isolation_forest", "iso_forest.pkl"))
 rf_regressor = joblib.load(
-    "../models/random_forest/aqi_random_forest_regressor.pkl"
+    os.path.join(BASE_DIR, "..", "models", "random_forest", "aqi_random_forest_regressor.pkl")
 )
+
 
 # ================= LSTM AQI FORECAST =================
 @app.route("/predict-aqi", methods=["POST"])
@@ -38,14 +44,18 @@ def predict_aqi():
         arr_scaled = scaler.transform(arr)
         arr_scaled = arr_scaled.reshape(1, 30, 1)
 
-        pred = lstm_model.predict(arr_scaled, verbose=0)
-        predicted_aqi = float(pred[0][0] * 500)
+        model = get_model()
+        prediction = model.predict(arr_scaled)
+
+        predicted_aqi = float(prediction[0][0] * 500)
 
         return jsonify({
             "predicted_aqi": round(predicted_aqi, 2)
         })
+
     except Exception as e:
         return jsonify({"error": str(e)}), 400
+
 
 
 # ================= RF AQI REGRESSION =================
