@@ -6,6 +6,10 @@ import joblib
 
 app = Flask(__name__)
 CORS(app)
+@app.route("/", methods=["GET"])
+def home():
+    return "Backend is running"
+
 
 # ================= LOAD MODELS =================
 import os
